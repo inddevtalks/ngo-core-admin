@@ -1,23 +1,23 @@
-import { PlatformShell } from "@/components/layout/app-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function BillingPage() {
   return (
-    <PlatformShell
+    <AppShell
       title="Billing"
       description="Subscription plans, usage meters, and upgrade triggers."
     >
-      <Card className="border-zinc-800 bg-zinc-900 text-zinc-100">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-base">Billing console (shell)</CardTitle>
+          <CardTitle className="text-base">Billing console</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-zinc-400">
-            Placeholder for tenant billing, free-tier usage alerts, and Render/Supabase upgrade
-            triggers. Wire to backend `finance` module when OpenAPI is ready.
+          <p className="text-sm text-neutral-500">
+            Placeholder for tenant billing, free-tier usage alerts, and upgrade triggers. Wire to
+            the finance module when those APIs are ready.
           </p>
         </CardContent>
       </Card>
-    </PlatformShell>
+    </AppShell>
   );
 }

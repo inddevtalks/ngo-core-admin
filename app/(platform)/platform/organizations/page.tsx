@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Organization } from "@ngocore/types";
-import { PlatformShell } from "@/components/layout/app-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ROUTES } from "@/constants/routes";
 import { createApiClient } from "@/lib/api";
 
 export default function OrganizationsPage() {
@@ -15,7 +16,6 @@ export default function OrganizationsPage() {
 
   useEffect(() => {
     const api = createApiClient();
-
     api.organizations
       .list()
       .then((response) => setOrganizations(response.data))
@@ -24,32 +24,32 @@ export default function OrganizationsPage() {
   }, []);
 
   return (
-    <PlatformShell title="Organizations" description="Onboard and manage NGO tenants.">
+    <AppShell title="Organizations" description="Onboard and manage NGO tenants.">
       <div className="mb-4 flex justify-end">
-        <Link href="/platform/organizations/new">
-          <Button className="bg-indigo-600 hover:bg-indigo-700">Create organization</Button>
+        <Link href={ROUTES.ORGANIZATION_NEW}>
+          <Button>Create organization</Button>
         </Link>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-900 text-zinc-100">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">All organizations</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? <p className="text-sm text-zinc-400">Loading…</p> : null}
+          {loading ? <p className="text-sm text-neutral-500">Loading…</p> : null}
           {error ? (
-            <p className="text-sm text-amber-400">
+            <p className="text-sm text-amber-700">
               API unavailable ({error}). Backend OpenAPI not connected yet.
             </p>
           ) : null}
           {!loading && !error && organizations.length === 0 ? (
-            <p className="text-sm text-zinc-400">No organizations onboarded yet.</p>
+            <p className="text-sm text-neutral-500">No organizations onboarded yet.</p>
           ) : null}
-          <ul className="divide-y divide-zinc-800">
+          <ul className="divide-y divide-[#dfeae7]">
             {organizations.map((org) => (
               <li key={org.id} className="py-3 text-sm">
-                <p className="font-medium">{org.name}</p>
-                <p className="text-zinc-400">
+                <p className="font-medium text-neutral-900">{org.name}</p>
+                <p className="text-neutral-500">
                   PAN: {org.pan} · {org.orgType}
                 </p>
               </li>
@@ -57,6 +57,6 @@ export default function OrganizationsPage() {
           </ul>
         </CardContent>
       </Card>
-    </PlatformShell>
+    </AppShell>
   );
 }

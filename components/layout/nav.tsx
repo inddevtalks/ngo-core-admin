@@ -1,41 +1,32 @@
-"use client";
+import type { LucideIcon } from "lucide-react";
+import { Building2, CreditCard, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { ROUTES } from "@/constants/routes";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+export type AppNavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match?: "exact" | "prefix";
+};
 
-const navItems = [
-  { href: "/platform", label: "Overview" },
-  { href: "/platform/organizations", label: "Organizations" },
-  { href: "/platform/billing", label: "Billing" },
-  { href: "/platform/compliance-monitor", label: "Compliance" },
+export type AppNavSection = {
+  label: string;
+  items: AppNavItem[];
+};
+
+export const APP_NAV: AppNavSection[] = [
+  {
+    label: "Platform",
+    items: [
+      { href: ROUTES.PLATFORM, label: "Overview", icon: LayoutDashboard, match: "exact" },
+      { href: ROUTES.ORGANIZATIONS, label: "Organizations", icon: Building2, match: "prefix" },
+      { href: ROUTES.BILLING, label: "Billing", icon: CreditCard, match: "prefix" },
+      { href: ROUTES.COMPLIANCE, label: "Compliance", icon: ShieldCheck, match: "prefix" },
+    ],
+  },
 ];
 
-export function PlatformNav() {
-  const pathname = usePathname();
-
-  return (
-    <nav className="flex flex-col gap-1">
-      {navItems.map((item) => {
-        const active =
-          pathname === item.href ||
-          (item.href !== "/platform" && pathname.startsWith(`${item.href}/`)) ||
-          (item.href === "/platform" && pathname === "/platform");
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              active
-                ? "bg-indigo-50 text-indigo-800"
-                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
-            )}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+export function isNavItemActive(pathname: string, item: AppNavItem) {
+  if (item.match === "exact") return pathname === item.href;
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }

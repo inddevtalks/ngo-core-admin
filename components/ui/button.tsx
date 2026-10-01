@@ -1,43 +1,55 @@
-import { cn } from "@/lib/utils";
-import type { ButtonHTMLAttributes } from "react";
+import React from "react";
 
-type ButtonVariant = "default" | "outline" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
-
-const variantClasses: Record<ButtonVariant, string> = {
-  default: "bg-emerald-600 text-white hover:bg-emerald-700",
-  outline: "border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50",
-  ghost: "bg-transparent text-zinc-700 hover:bg-zinc-100",
-};
-
-const sizeClasses: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
-  lg: "h-11 px-6 text-base",
-};
-
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
+  isLoading?: boolean;
 }
 
-export function Button({
-  className,
-  variant = "default",
-  size = "md",
-  type = "button",
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      type={type}
-      className={cn(
-        "inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
-      {...props}
-    />
-  );
-}
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      variant = "primary",
+      size = "md",
+      className = "",
+      disabled,
+      isLoading,
+      children,
+      type = "button",
+      ...props
+    },
+    ref,
+  ) => {
+    const baseStyles =
+      "cursor-pointer font-medium rounded-lg transition-colors duration-200 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
+
+    const variants = {
+      primary: "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
+      secondary: "bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-200",
+      ghost: "text-primary-600 hover:bg-primary-50 active:bg-primary-100",
+    };
+
+    const sizes = {
+      sm: "px-3 py-2 text-sm",
+      md: "h-10 px-4 py-2.5 text-sm",
+      lg: "h-[52px] px-6 py-3 text-base w-full",
+    };
+
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={disabled || isLoading}
+        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+        {...props}
+      >
+        {isLoading ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : null}
+        {children}
+      </button>
+    );
+  },
+);
+
+Button.displayName = "Button";

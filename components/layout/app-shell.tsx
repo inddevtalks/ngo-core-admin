@@ -1,42 +1,63 @@
-import Link from "next/link";
-import { PlatformNav } from "./nav";
+"use client";
 
-interface PlatformShellProps {
+import { useCallback, useEffect, useState } from "react";
+import { Shield } from "lucide-react";
+import { getSidebarPinned, setSidebarPinned } from "@/lib/sidebar-session";
+import { AppSidebar, SidebarToggle } from "./app-sidebar";
+
+interface AppShellProps {
   title: string;
   description?: string;
   children: React.ReactNode;
 }
 
-export function PlatformShell({ title, description, children }: PlatformShellProps) {
+export function AppShell({ title, description, children }: AppShellProps) {
+  const [sidebarPinned, setPinned] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false);
+  }, []);
+
+  useEffect(() => {
+    const pinned = getSidebarPinned();
+    setPinned(pinned);
+    setSidebarOpen(pinned);
+  }, []);
+
+  function togglePin() {
+    const next = !sidebarPinned;
+    setPinned(next);
+    setSidebarPinned(next);
+    if (next) setSidebarOpen(true);
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="border-b border-zinc-800 bg-zinc-900">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div>
-            <Link href="/platform" className="text-lg font-semibold text-indigo-300">
-              NGOCORE Admin
-            </Link>
-            <p className="text-xs text-zinc-400">APNA TECH platform operators</p>
-          </div>
-          <Link href="/login" className="text-sm text-zinc-400 hover:text-zinc-200">
-            Sign out
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#f3f5f4]">
+      <AppSidebar open={sidebarOpen} pinned={sidebarPinned} onClose={closeSidebar} onTogglePin={togglePin} />
 
-      <div className="mx-auto grid max-w-6xl gap-8 px-6 py-8 md:grid-cols-[220px_1fr]">
-        <aside className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-          <PlatformNav />
-        </aside>
-
-        <main>
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold">{title}</h1>
-            {description ? <p className="mt-1 text-sm text-zinc-400">{description}</p> : null}
+      <div className={sidebarPinned && sidebarOpen ? "lg:pl-[272px]" : ""}>
+        <header className="sticky top-0 z-30 border-b border-[#dfeae7] bg-[#f3f5f4]/90 backdrop-blur-md">
+          <div className="flex items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
+            {!sidebarOpen ? <SidebarToggle onClick={() => setSidebarOpen(true)} /> : null}
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-xl font-semibold tracking-[-0.03em] text-neutral-900 sm:text-2xl">
+                {title}
+              </h1>
+              {description ? (
+                <p className="mt-0.5 truncate text-sm text-neutral-500">{description}</p>
+              ) : null}
+            </div>
+            <div className="ml-auto flex max-w-[46%] shrink-0 items-center gap-2 rounded-full border border-[#dfeae7] bg-white px-3 py-1.5 shadow-sm sm:max-w-none sm:px-3.5 sm:py-2">
+              <Shield className="h-4 w-4 shrink-0 text-primary-700" />
+              <span className="truncate text-sm font-semibold text-[#0f2d2a]">Platform admin</span>
+            </div>
           </div>
-          {children}
-        </main>
+        </header>
+
+        <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );
 }
+
+export const PlatformShell = AppShell;

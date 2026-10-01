@@ -3,14 +3,11 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { NGOCoreLogo } from "@/components/ui/NGOCoreLogo";
+import { ROUTES } from "@/constants/routes";
 import { createBrowserSupabaseClient } from "@/lib/supabase";
 
-/**
- * Platform admin auth — separate from NGO staff auth in ngocore-frontend.
- * Backend must enforce `platform_admin` role on admin API routes.
- */
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -23,17 +20,15 @@ export default function AdminLoginPage() {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-
     try {
       const supabase = createBrowserSupabaseClient();
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: false },
       });
-
       if (error) throw error;
       setOtpSent(true);
-      setMessage("Platform admin OTP sent. Only allowlisted emails should succeed.");
+      setMessage("We sent a one-time passcode to your email.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to send OTP.");
     } finally {
@@ -45,7 +40,6 @@ export default function AdminLoginPage() {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-
     try {
       const supabase = createBrowserSupabaseClient();
       const { error } = await supabase.auth.verifyOtp({
@@ -53,9 +47,8 @@ export default function AdminLoginPage() {
         token,
         type: "email",
       });
-
       if (error) throw error;
-      router.push("/platform");
+      router.push(ROUTES.PLATFORM);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Invalid OTP.");
     } finally {
@@ -64,67 +57,70 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
-      <Card className="w-full max-w-md border-zinc-800 bg-zinc-900 text-zinc-100">
-        <CardHeader>
-          <CardTitle>Platform admin sign-in</CardTitle>
-          <CardDescription className="text-zinc-400">
-            Restricted to APNA TECH operators. Separate deployment and auth surface from NGO
-            staff app.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!otpSent ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="mb-1 block text-sm font-medium">
-                  Admin email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@apnatech.in"
-                  className="border-zinc-700 bg-zinc-950 text-zinc-100"
-                />
-              </div>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
-                {loading ? "Sending…" : "Send admin OTP"}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label htmlFor="otp" className="mb-1 block text-sm font-medium">
-                  One-time passcode
-                </label>
-                <Input
-                  id="otp"
-                  required
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  className="border-zinc-700 bg-zinc-950 text-zinc-100"
-                />
-              </div>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
-                {loading ? "Verifying…" : "Verify & enter console"}
-              </Button>
-            </form>
-          )}
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f7f6] px-4">
+      <div className="w-full max-w-[480px] rounded-2xl border border-[#e8eeec] bg-white px-4 py-6 shadow-[0_24px_70px_rgba(15,45,42,0.12)] sm:rounded-[40px] sm:px-8 sm:py-8">
+        <NGOCoreLogo href={ROUTES.LOGIN} />
+        <div className="mt-6 space-y-2">
+          <h1 className="text-[2rem] font-bold leading-[1.1] tracking-[-0.04em] text-neutral-900">
+            Platform admin
+          </h1>
+          <p className="text-sm leading-relaxed text-neutral-500">
+            Sign in with an APNA TECH operator email. This console is separate from the NGO staff app.
+          </p>
+        </div>
 
-          {message ? <p className="mt-4 text-sm text-zinc-400">{message}</p> : null}
+        {!otpSent ? (
+          <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
+            <Input
+              id="email"
+              type="email"
+              label="Admin email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@apnatech.in"
+              autoComplete="email"
+            />
+            <Button type="submit" size="lg" isLoading={loading} className="h-12 w-full rounded-xl bg-[#0f5c54] hover:bg-[#0d4f48]">
+              Send login code
+            </Button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="mt-6 space-y-4">
+            <Input
+              id="otp"
+              label="One-time passcode"
+              required
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="123456"
+            />
+            <Button type="submit" size="lg" isLoading={loading} className="h-12 w-full rounded-xl bg-[#0f5c54] hover:bg-[#0d4f48]">
+              Verify & continue
+            </Button>
+            <button
+              type="button"
+              className="text-sm font-medium text-primary-600 underline underline-offset-2 hover:text-primary-700"
+              onClick={() => {
+                setOtpSent(false);
+                setMessage(null);
+              }}
+            >
+              Use a different email
+            </button>
+          </form>
+        )}
 
-          <Button
-            variant="ghost"
-            className="mt-4 w-full text-zinc-300 hover:bg-zinc-800"
-            onClick={() => router.push("/platform")}
-          >
-            Skip to console (dev)
-          </Button>
-        </CardContent>
-      </Card>
+        {message ? <p className="mt-4 text-sm text-neutral-600">{message}</p> : null}
+
+        <Button
+          variant="ghost"
+          className="mt-4 w-full"
+          onClick={() => router.push(ROUTES.PLATFORM)}
+        >
+          Skip to console (dev)
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,18 +1,18 @@
-import { PlatformShell } from "@/components/layout/app-shell";
+import { AppShell } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ComplianceMonitorPage() {
   return (
-    <PlatformShell
+    <AppShell
       title="Compliance monitor"
       description="Cross-tenant 80G, FCRA, and DPDP compliance signals."
     >
-      <Card className="border-zinc-800 bg-zinc-900 text-zinc-100">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-base">Compliance dashboard (shell)</CardTitle>
+          <CardTitle className="text-base">Compliance dashboard</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="list-disc space-y-2 pl-5 text-sm text-zinc-400">
+          <ul className="list-disc space-y-2 pl-5 text-sm text-neutral-600">
             <li>80G receipt sequence gaps</li>
             <li>FCRA / domestic fund mixing alerts</li>
             <li>Form 10BD export readiness</li>
@@ -20,6 +20,6 @@ export default function ComplianceMonitorPage() {
           </ul>
         </CardContent>
       </Card>
-    </PlatformShell>
+    </AppShell>
   );
 }
