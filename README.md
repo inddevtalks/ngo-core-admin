@@ -1,6 +1,6 @@
 # NGOCORE Platform Admin
 
-Console for APNA TECH operators (tenant onboarding, billing, compliance monitoring).
+Console for NGO CORE operators (tenant onboarding, billing, compliance monitoring).
 
 ## Auth
 
