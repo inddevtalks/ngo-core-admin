@@ -1,6 +1,5 @@
+import { createBrowserClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-let browserClient: SupabaseClient | null = null;
 
 function getSupabaseConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -15,18 +14,20 @@ function getSupabaseConfig() {
   return { url, anonKey };
 }
 
-/** Browser Supabase client for OTP / session auth. */
-export function createBrowserSupabaseClient(): SupabaseClient {
-  if (typeof window === "undefined") {
-    return createClient(getSupabaseConfig().url, getSupabaseConfig().anonKey);
-  }
-
-  if (!browserClient) {
-    const { url, anonKey } = getSupabaseConfig();
-    browserClient = createClient(url, anonKey);
-  }
-
-  return browserClient;
+/** Browser Supabase client — session stored in cookies via @supabase/ssr. */
+export function createBrowserSupabaseClient() {
+  const { url, anonKey } = getSupabaseConfig();
+  return createBrowserClient(url, anonKey, {
+    cookieOptions: {
+      path: "/",
+      sameSite: "lax",
+    },
+    auth: {
+      detectSessionInUrl: false,
+      flowType: "pkce",
+      persistSession: true,
+    },
+  });
 }
 
 /** Server-side Supabase client (no persisted session). */

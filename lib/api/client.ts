@@ -1,4 +1,5 @@
 import type { ApiError } from "@ngocore/types";
+import { redirectToLoginOnExpiry } from "@/lib/auth-session";
 
 export type TokenProvider = () => Promise<string | null>;
 
@@ -50,11 +51,25 @@ export class ApiClient {
       let code: string | undefined;
 
       try {
-        const body = (await response.json()) as { message?: string; code?: string };
-        message = body.message ?? message;
+        const body = (await response.json()) as {
+          message?: string | string[];
+          code?: string;
+          error?: string;
+        };
+        if (Array.isArray(body.message)) {
+          message = body.message.join(", ");
+        } else if (typeof body.message === "string" && body.message) {
+          message = body.message;
+        } else if (body.error) {
+          message = body.error;
+        }
         code = body.code;
       } catch {
         // ignore parse errors
+      }
+
+      if (response.status === 401) {
+        void redirectToLoginOnExpiry("unauthorized");
       }
 
       throw new ApiClientError({ message, code, status: response.status });

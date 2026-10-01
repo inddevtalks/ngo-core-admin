@@ -1,33 +1,49 @@
-# NGOCORE Platform Admin — Architecture & Specs
+# NGOCORE Platform Admin
 
-APNA TECH (NGOCORE) console for platform operators — org onboarding, billing, compliance monitoring, and support. This repository currently holds **planning documents only**. Application code has not started.
+Console for APNA TECH operators (tenant onboarding, billing, compliance monitoring).
 
-## Documentation
+## Auth
 
-| Document | Description |
-|----------|-------------|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Admin app structure, security model, deployment plan |
-| [Backend specs](../ngocore-backend/docs/ARCHITECTURE.md) | Shared system architecture (sibling repo) |
-| [OpenAPI contract](../ngocore-backend/docs/specs/openapi.yaml) | API contract for spec-driven development |
+Email/password **superadmin** only. Seed from backend:
 
-## Planned Stack
+```bash
+cd ../ngocore-backend
+npm run seed:superadmin
+```
 
-- **Framework**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- **Auth**: Supabase Auth with platform-admin allowlist (separate from NGO staff)
-- **API**: Backend admin routes gated by `platform_admin` role
-- **Deploy**: Cloudflare Pages — **separate project/subdomain** from frontend
+| Field | Default |
+|-------|---------|
+| Email | `superadmin@ngocore.org` |
+| Password | `SuperAdmin@123` |
 
-## Planned Users
+## Pages
 
-APNA TECH internal staff only — not NGO org members.
+| Page | Path | Operations |
+|------|------|------------|
+| Overview | `/platform` | Tenant counts, recent orgs, quick links |
+| Organizations | `/platform/organizations` | Search, status filters, suspend / reinstate / activate |
+| Onboard wizard | `/platform/organizations/new` | Org → compliance → owner → review |
+| Org detail | `/platform/organizations/[id]` | Profile, compliance fields, team/owner invite, status lifecycle |
+| Billing | `/platform/billing` | Plan catalog, usage meters, assign tenant plan |
+| Compliance | `/platform/compliance-monitor` | Cross-tenant alerts + Form 10BD readiness |
+| Support | `/platform/support` | Audited tenant lookup, access request, export assist |
+| Audit log | `/platform/audit` | Cross-tenant append-only action trail |
 
-## Related Repos
+Backend APIs live under `/api/v1/platform/*` (see `docs/ARCHITECTURE.md`).
+
+## Local run
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Open http://localhost:3000/login (or whatever port Next assigns).
+
+## Related
 
 | Repo | Purpose |
 |------|---------|
-| `ngocore-backend` | API, database, platform admin endpoints |
+| `ngocore-backend` | API + `seed:superadmin` |
 | `ngocore-frontend` | NGO staff app |
-
-## License
-
-Proprietary — APNA TECH

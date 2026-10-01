@@ -49,7 +49,7 @@ export function AppShell({ title, description, children }: AppShellProps) {
             </div>
             <div className="ml-auto flex max-w-[46%] shrink-0 items-center gap-2 rounded-full border border-[#dfeae7] bg-white px-3 py-1.5 shadow-sm sm:max-w-none sm:px-3.5 sm:py-2">
               <Shield className="h-4 w-4 shrink-0 text-primary-700" />
-              <span className="truncate text-sm font-semibold text-[#0f2d2a]">Platform admin</span>
+                              <span className="truncate text-sm font-semibold text-[#0f2d2a]">Superadmin</span>
             </div>
           </div>
         </header>

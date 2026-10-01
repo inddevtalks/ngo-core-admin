@@ -1,126 +1,131 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AuthLayout } from "@/components/layout/auth-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NGOCoreLogo } from "@/components/ui/NGOCoreLogo";
 import { ROUTES } from "@/constants/routes";
+import { isSuperAdminEmail } from "@/lib/superadmin";
 import { createBrowserSupabaseClient } from "@/lib/supabase";
+
+const DEFAULT_EMAIL =
+  process.env.NEXT_PUBLIC_SUPERADMIN_EMAIL ?? "superadmin@ngocore.org";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [token, setToken] = useState("");
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next") || ROUTES.PLATFORM;
+  const reason = searchParams.get("reason");
+
+  const [email, setEmail] = useState(DEFAULT_EMAIL);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSendOtp(event: FormEvent) {
+  async function handleLogin(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-    try {
-      const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: false },
-      });
-      if (error) throw error;
-      setOtpSent(true);
-      setMessage("We sent a one-time passcode to your email.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to send OTP.");
-    } finally {
-      setLoading(false);
-    }
-  }
 
-  async function handleVerifyOtp(event: FormEvent) {
-    event.preventDefault();
-    setLoading(true);
-    setMessage(null);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+
+    if (!normalizedEmail || !normalizedPassword) {
+      setMessage("Email and password are required.");
+      setLoading(false);
+      return;
+    }
+
+    if (!isSuperAdminEmail(normalizedEmail)) {
+      setMessage("This account is not authorized for the platform admin console.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const supabase = createBrowserSupabaseClient();
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: "email",
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: normalizedPassword,
       });
       if (error) throw error;
-      router.push(ROUTES.PLATFORM);
+
+      const signedInEmail = data.user?.email?.toLowerCase() ?? "";
+      if (!isSuperAdminEmail(signedInEmail)) {
+        await supabase.auth.signOut();
+        throw new Error("This account is not authorized for the platform admin console.");
+      }
+
+      router.push(nextPath.startsWith("/") ? nextPath : ROUTES.PLATFORM);
+      router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Invalid OTP.");
+      setMessage(error instanceof Error ? error.message : "Invalid email or password.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f7f6] px-4">
-      <div className="w-full max-w-[480px] rounded-2xl border border-[#e8eeec] bg-white px-4 py-6 shadow-[0_24px_70px_rgba(15,45,42,0.12)] sm:rounded-[40px] sm:px-8 sm:py-8">
-        <NGOCoreLogo href={ROUTES.LOGIN} />
-        <div className="mt-6 space-y-2">
-          <h1 className="text-[2rem] font-bold leading-[1.1] tracking-[-0.04em] text-neutral-900">
-            Platform admin
-          </h1>
-          <p className="text-sm leading-relaxed text-neutral-500">
-            Sign in with an APNA TECH operator email. This console is separate from the NGO staff app.
-          </p>
-        </div>
-
-        {!otpSent ? (
-          <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
-            <Input
-              id="email"
-              type="email"
-              label="Admin email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@apnatech.in"
-              autoComplete="email"
-            />
-            <Button type="submit" size="lg" isLoading={loading} className="h-12 w-full rounded-xl bg-[#0f5c54] hover:bg-[#0d4f48]">
-              Send login code
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="mt-6 space-y-4">
-            <Input
-              id="otp"
-              label="One-time passcode"
-              required
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="123456"
-            />
-            <Button type="submit" size="lg" isLoading={loading} className="h-12 w-full rounded-xl bg-[#0f5c54] hover:bg-[#0d4f48]">
-              Verify & continue
-            </Button>
-            <button
-              type="button"
-              className="text-sm font-medium text-primary-600 underline underline-offset-2 hover:text-primary-700"
-              onClick={() => {
-                setOtpSent(false);
-                setMessage(null);
-              }}
-            >
-              Use a different email
-            </button>
-          </form>
-        )}
-
-        {message ? <p className="mt-4 text-sm text-neutral-600">{message}</p> : null}
-
-        <Button
-          variant="ghost"
-          className="mt-4 w-full"
-          onClick={() => router.push(ROUTES.PLATFORM)}
-        >
-          Skip to console (dev)
-        </Button>
+    <AuthLayout>
+      <div className="space-y-2 text-left">
+        <h1 className="text-[2rem] font-bold leading-[1.1] tracking-[-0.04em] text-neutral-900">
+          Superadmin
+        </h1>
+        <p className="text-sm leading-relaxed text-neutral-500">
+          Sign in with the platform superadmin account. This console is separate from the NGO staff
+          app.
+        </p>
+        {reason === "expired" ? (
+          <p className="text-sm font-medium text-amber-700">Your session expired. Sign in again.</p>
+        ) : null}
+        {reason === "unauthorized" ? (
+          <p className="text-sm font-medium text-amber-700">You need to sign in to continue.</p>
+        ) : null}
       </div>
-    </div>
+
+      <form onSubmit={handleLogin} className="mt-6 space-y-4">
+        <Input
+          id="email"
+          type="email"
+          label="Email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="superadmin@ngocore.org"
+          autoComplete="username"
+        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            label="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-[38px] text-xs font-medium text-primary-700 hover:underline"
+            onClick={() => setShowPassword((value) => !value)}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
+        <Button
+          type="submit"
+          size="lg"
+          isLoading={loading}
+          className="h-12 w-full rounded-xl bg-[#0f5c54] hover:bg-[#0d4f48]"
+        >
+          Sign in
+        </Button>
+      </form>
+
+      {message ? <p className="mt-4 text-sm font-medium text-red-600">{message}</p> : null}
+    </AuthLayout>
   );
 }

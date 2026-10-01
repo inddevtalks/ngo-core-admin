@@ -6,12 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ngocore/types": "file:../packages/types",
+    "@ngocore/types": "file:../ngocore-frontend/packages/types",
+    "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.49.1",
-    "lucide-react": "^1.49.0",
+    "lucide-react": "^1.40.0",
     "next": "15.5.24",
     "react": "19.1.0",
     "react-dom": "19.1.0"

@@ -30,7 +30,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [userLabel, setUserLabel] = useState("Platform admin");
+  const [userLabel, setUserLabel] = useState("Superadmin");
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -70,8 +70,8 @@ export function AppSidebar({
     router.replace(ROUTES.LOGIN);
   }
 
-  return (
-    <>
+return (
+    <div>
       <div
         className={cn(
           "fixed inset-0 z-40 bg-[#0f2d2a]/40 backdrop-blur-[2px] transition-opacity",
@@ -119,31 +119,32 @@ export function AppSidebar({
 
         <nav className="mt-2 flex-1 overflow-y-auto px-3 pb-4">
           {APP_NAV.map((section) => (
-            <div key={section.label} className="mb-5">
+            <div key={section.id} className="mb-5">
               <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
                 {section.label}
               </p>
-              <div className="flex flex-col gap-0.5">
+              <ul className="flex flex-col gap-0.5">
                 {section.items.map((item) => {
                   const active = isNavItemActive(pathname, item);
                   const Icon = item.icon;
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                        active
-                          ? "bg-[#2e8a7f] text-white shadow-[0_8px_18px_rgba(46,138,127,0.28)]"
-                          : "text-white/70 hover:bg-white/10 hover:text-white",
-                      )}
-                    >
-                      <Icon className="h-[18px] w-[18px] shrink-0" />
-                      {item.label}
-                    </Link>
+                    <li key={section.id + ":" + item.id}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                          active
+                            ? "bg-[#2e8a7f] text-white shadow-[0_8px_18px_rgba(46,138,127,0.28)]"
+                            : "text-white/70 hover:bg-white/10 hover:text-white",
+                        )}
+                      >
+                        <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
+                        <span>{item.label}</span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
           ))}
         </nav>
@@ -168,7 +169,7 @@ export function AppSidebar({
           </button>
         </div>
       </aside>
-    </>
+    </div>
   );
 }
 
