@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Eye, Search } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
