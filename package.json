@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ngocore/types": "file:../ngocore-frontend/packages/types",
+    "@ngocore/types": "file:./packages/types",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.49.1",
     "lucide-react": "^1.40.0",

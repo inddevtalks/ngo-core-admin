@@ -41,6 +41,8 @@ npm run dev
 
 Open http://localhost:3000/login (or whatever port Next assigns).
 
+`@ngocore/types` is vendored at `packages/types` (not a sibling frontend path) so Vercel/CI can resolve it without `ngocore-frontend`.
+
 ## Related
 
 | Repo | Purpose |
